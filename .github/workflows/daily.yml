@@ -1,23 +1,59 @@
-name: Daily Commit
+name: Daily Pattern Commit
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Runs every day at 12:00 AM UTC
-  workflow_dispatch:     # Manual run bhi allowed
+    - cron: '0 0 * * *'  # Rozana 12:00 AM UTC
+  workflow_dispatch:
 
 jobs:
-  daily-commit:
+  pattern-commit:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Make a change
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Run pattern commit script
       run: |
-        echo "$(date) - daily update" >> log.txt
-        git config --global user.name "chsabii"
-        git config --global user.email "choudarysohaib786@gmail.com"
-        git add log.txt
-        git commit -m "Daily update: $(date)"
-        git push
+        import datetime
+        import subprocess
+
+        # Full DATAGRID pattern (7 rows x ~52 columns)
+        PATTERN = [
+            [10,10,10,10,10, 0, 10,  5, 10,  5, 10,  5,  0, 10,10,10,10,10, 0, 10, 10,10,10,10, 0,  5, 10,10,10, 5,  0, 10,  0, 10,  0, 10,10,10,10,10, 0, 10,10,10,10,10, 0, 10,10,10,10,10],
+            [10, 0,  0,  0,10, 0, 10, 10,  0, 10,  0, 10, 0, 10, 0,  0,  0,10, 0, 10,  0,  0,  0,10, 0,  5,  0,  0, 10, 0, 10,  0, 10,  0, 10, 0,  0,  0,10, 0, 10,  0,  0,  0,10, 0, 10,  0,  0,  0,10],
+            [10, 0,  0,  0,10, 0, 10, 10,  0, 10,  0, 10, 0, 10, 0,  0,  0,10, 0, 10, 10, 10,10,10, 0,  5,  0,  0, 10, 0, 10,  0, 10,  0, 10, 0,  0,  0,10, 0, 10, 10, 10,10,10, 0, 10,  0,  0,  0,10],
+            [10, 0,  0,  0,10, 0, 10, 10,  0, 10,  0, 10, 0, 10, 0,  0,  0,10, 0, 10,  0,  0,  0,10, 0,  5,  0,  0, 10, 0, 10,  0, 10,  0, 10, 0,  0,  0,10, 0, 10,  0,  0,  0,10, 0, 10,  0,  0,  0,10],
+            [10, 0,  0,  0,10, 0, 10, 10,  0, 10,  0, 10, 0, 10, 0,  0,  0,10, 0, 10, 10, 10,10,10, 0,  5,  0,  0, 10, 0, 10,  0, 10,  0, 10, 0,  0,  0,10, 0, 10, 10, 10,10,10, 0, 10,  0,  0,  0,10],
+            [10, 0,  0,  0,10, 0, 10, 10,  0, 10,  0, 10, 0, 10, 0,  0,  0,10, 0, 10,  0,  0,  0,10, 0,  5,  0,  0, 10, 0, 10,  0, 10,  0, 10, 0,  0,  0,10, 0, 10,  0,  0,  0,10, 0, 10,  0,  0,  0,10],
+            [10,10,10,10,10, 0, 10,  5, 10,  5, 10,  5, 0, 10,10,10,10,10, 0, 10, 10,10,10,10, 0,  5, 10,10,10, 5, 0, 10,  0, 10,  0, 10,10,10,10,10, 0, 10,10,10,10,10, 0, 10,10,10,10,10],
+        ]
+
+        today = datetime.date.today()
+        year_start = datetime.date(today.year, 1, 1)
+        week_num = (today - year_start).days // 7
+        day_num = today.weekday()  # 0=Monday, 6=Sunday
+        day_num = (day_num + 1) % 7  # Adjust Sunday=0
+
+        commits_today = 0
+        if week_num < len(PATTERN[0]) and day_num < len(PATTERN):
+            commits_today = PATTERN[day_num][week_num]
+
+        print(f"Week: {week_num}, Day: {day_num}, Commits today: {commits_today}")
+
+        subprocess.run(["git", "config", "--global", "user.name", "chsabii"])
+        subprocess.run(["git", "config", "--global", "user.email", "choudarysohaib786@gmail.com"])
+
+        for i in range(commits_today):
+            with open("log.txt", "a") as f:
+                f.write(f"{datetime.datetime.now()} - Auto commit {i+1}\n")
+            subprocess.run(["git", "add", "log.txt"])
+            subprocess.run(["git", "commit", "-m", f"Pattern commit {i+1} - {datetime.datetime.now()}"])
+
+        if commits_today > 0:
+            subprocess.run(["git", "push"])
