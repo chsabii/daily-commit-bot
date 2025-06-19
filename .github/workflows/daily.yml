@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write  # Required to push changes
+  contents: write
 
 jobs:
   pattern-commit:
@@ -26,39 +26,44 @@ jobs:
 
     - name: Run pattern commit script
       run: |
-        import datetime
-        import subprocess
+        echo '
+import datetime
+import subprocess
 
-        PATTERN = [
-            [10,10,10,10,10, 0, 10,  5, 10,  5, 10,  5,  0, 10,10,10,10,10, 0, 10, 10,10,10,10, 0,  5, 10,10,10, 5,  0, 10,  0, 10,  0, 10,10,10,10,10, 0, 10,10,10,10,10, 0, 10,10,10,10,10],
-            [10, 0,  0,  0,10, 0, 10, 10,  0, 10,  0, 10, 0, 10, 0,  0,  0,10, 0, 10,  0,  0,  0,10, 0,  5,  0,  0, 10, 0, 10,  0, 10,  0, 10, 0,  0,  0,10, 0, 10,  0,  0,  0,10, 0, 10,  0,  0,  0,10],
-            [10, 0,  0,  0,10, 0, 10, 10,  0, 10,  0, 10, 0, 10, 0,  0,  0,10, 0, 10, 10, 10,10,10, 0,  5,  0,  0, 10, 0, 10,  0, 10,  0, 10, 0,  0,  0,10, 0, 10, 10, 10,10,10, 0, 10,  0,  0,  0,10],
-            [10, 0,  0,  0,10, 0, 10, 10,  0, 10,  0, 10, 0, 10, 0,  0,  0,10, 0, 10,  0,  0,  0,10, 0,  5,  0,  0, 10, 0, 10,  0, 10,  0, 10, 0,  0,  0,10, 0, 10,  0,  0,  0,10, 0, 10,  0,  0,  0,10],
-            [10, 0,  0,  0,10, 0, 10, 10,  0, 10,  0, 10, 0, 10, 0,  0,  0,10, 0, 10, 10, 10,10,10, 0,  5,  0,  0, 10, 0, 10,  0, 10,  0, 10, 0,  0,  0,10, 0, 10, 10, 10,10,10, 0, 10,  0,  0,  0,10],
-            [10, 0,  0,  0,10, 0, 10, 10,  0, 10,  0, 10, 0, 10, 0,  0,  0,10, 0, 10,  0,  0,  0,10, 0,  5,  0,  0, 10, 0, 10,  0, 10,  0, 10, 0,  0,  0,10, 0, 10,  0,  0,  0,10, 0, 10,  0,  0,  0,10],
-            [10,10,10,10,10, 0, 10,  5, 10,  5, 10,  5, 0, 10,10,10,10,10, 0, 10, 10,10,10,10, 0,  5, 10,10,10, 5, 0, 10,  0, 10,  0, 10,10,10,10,10, 0, 10,10,10,10,10, 0, 10,10,10,10,10],
-        ]
+PATTERN = [
+    [10,10,10,10,10, 0, 10,  5, 10,  5, 10,  5,  0, 10,10,10,10,10, 0, 10, 10,10,10,10, 0,  5, 10,10,10, 5,  0, 10,  0, 10,  0, 10,10,10,10,10, 0, 10,10,10,10,10, 0, 10,10,10,10,10],
+    [10, 0,  0,  0,10, 0, 10, 10,  0, 10,  0, 10, 0, 10, 0,  0,  0,10, 0, 10,  0,  0,  0,10, 0,  5,  0,  0, 10, 0, 10,  0, 10,  0, 10, 0,  0,  0,10, 0, 10,  0,  0,  0,10, 0, 10,  0,  0,  0,10],
+    [10, 0,  0,  0,10, 0, 10, 10,  0, 10,  0, 10, 0, 10, 0,  0,  0,10, 0, 10, 10, 10,10,10, 0,  5,  0,  0, 10, 0, 10,  0, 10,  0, 10, 0,  0,  0,10, 0, 10, 10, 10,10,10, 0, 10,  0,  0,  0,10],
+    [10, 0,  0,  0,10, 0, 10, 10,  0, 10,  0, 10, 0, 10, 0,  0,  0,10, 0, 10,  0,  0,  0,10, 0,  5,  0,  0, 10, 0, 10,  0, 10,  0, 10, 0,  0,  0,10, 0, 10,  0,  0,  0,10, 0, 10,  0,  0,  0,10],
+    [10, 0,  0,  0,10, 0, 10, 10,  0, 10,  0, 10, 0, 10, 0,  0,  0,10, 0, 10, 10, 10,10,10, 0,  5,  0,  0, 10, 0, 10,  0, 10,  0, 10, 0,  0,  0,10, 0, 10, 10, 10,10,10, 0, 10,  0,  0,  0,10],
+    [10, 0,  0,  0,10, 0, 10, 10,  0, 10,  0, 10, 0, 10, 0,  0,  0,10, 0, 10,  0,  0,  0,10, 0,  5,  0,  0, 10, 0, 10,  0, 10,  0, 10, 0,  0,  0,10, 0, 10,  0,  0,  0,10, 0, 10,  0,  0,  0,10],
+    [10,10,10,10,10, 0, 10,  5, 10,  5, 10,  5, 0, 10,10,10,10,10, 0, 10, 10,10,10,10, 0,  5, 10,10,10, 5, 0, 10,  0, 10,  0, 10,10,10,10,10, 0, 10,10,10,10,10, 0, 10,10,10,10,10],
+]
 
-        today = datetime.date.today()
-        year_start = datetime.date(today.year, 1, 1)
-        week_num = (today - year_start).days // 7
-        day_num = today.weekday()
-        day_num = (day_num + 1) % 7
+today = datetime.date.today()
+year_start = datetime.date(today.year, 1, 1)
+week_num = (today - year_start).days // 7
+day_num = today.weekday()
+day_num = (day_num + 1) % 7
 
-        commits_today = 0
-        if week_num < len(PATTERN[0]) and day_num < len(PATTERN):
-            commits_today = PATTERN[day_num][week_num]
+commits_today = 0
+if week_num < len(PATTERN[0]) and day_num < len(PATTERN):
+    commits_today = PATTERN[day_num][week_num]
 
-        print(f"Week: {week_num}, Day: {day_num}, Commits today: {commits_today}")
+print(f"Week: {week_num}, Day: {day_num}, Commits today: {commits_today}")
 
-        subprocess.run(["git", "config", "--global", "user.name", "chsabii"])
-        subprocess.run(["git", "config", "--global", "user.email", "choudarysohaib786@gmail.com"])
+subprocess.run(["git", "config", "--global", "user.name", "chsabii"])
+subprocess.run(["git", "config", "--global", "user.email", "choudarysohaib786@gmail.com"])
 
-        for i in range(commits_today):
-            with open("log.txt", "a") as f:
-                f.write(f"{datetime.datetime.now()} - Auto commit {i+1}\n")
-            subprocess.run(["git", "add", "log.txt"])
-            subprocess.run(["git", "commit", "-m", f"Pattern commit {i+1} - {datetime.datetime.now()}"])
+for i in range(commits_today):
+    with open("log.txt", "a") as f:
+        f.write(f"{datetime.datetime.now()} - Auto commit {i+1}\\n")
+    subprocess.run(["git", "add", "log.txt"])
+    subprocess.run(["git", "commit", "-m", f"Pattern commit {i+1} - {datetime.datetime.now()}"])
 
-        if commits_today > 0:
-            subprocess.run(["git", "push"])
+if commits_today > 0:
+    subprocess.run(["git", "push"])
+        ' > pattern_commit.py
+
+    - name: Execute commit pattern script
+      run: python pattern_commit.py
