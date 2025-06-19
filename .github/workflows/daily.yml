@@ -24,9 +24,9 @@ jobs:
       with:
         python-version: '3.x'
 
-    - name: Run pattern commit script
+    - name: Write pattern script to file
       run: |
-        echo '
+        cat << 'EOF' > pattern_commit.py
 import datetime
 import subprocess
 
@@ -63,7 +63,7 @@ for i in range(commits_today):
 
 if commits_today > 0:
     subprocess.run(["git", "push"])
-        ' > pattern_commit.py
+EOF
 
-    - name: Execute commit pattern script
+    - name: Run Python script
       run: python pattern_commit.py
