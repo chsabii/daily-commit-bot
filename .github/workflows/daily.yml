@@ -1,70 +1,46 @@
-name: Daily Pattern Commit
+name: Daily Commit
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Daily at 12:00 AM UTC
-  workflow_dispatch:
-
-permissions:
-  contents: write
+    - cron: '0 0 * * *'   # Roz raat 12 baje chalega
+  workflow_dispatch:       # Manually bhi run kar sakte ho
 
 jobs:
-  pattern-commit:
+  daily-commit:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Ensure log file exists
-        run: touch log.txt
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
-      - name: Write pattern script to file
-        shell: bash
+      - name: Run daily commit script
         run: |
-          cat > pattern_commit.py << 'PY'
-          import datetime
-          import subprocess
+          import subprocess, datetime
 
-          PATTERN = [
-              [10,10,10,10,10, 0, 10,  5, 10,  5, 10,  5,  0, 10,10,10,10,10, 0, 10, 10,10,10,10, 0,  5, 10,10,10, 5,  0, 10,  0, 10,  0, 10,10,10,10,10, 0, 10,10,10,10,10, 0, 10,10,10,10,10],
-              [10, 0,  0,  0,10, 0, 10, 10,  0, 10,  0, 10, 0, 10, 0,  0,  0,10, 0, 10,  0,  0,  0,10, 0,  5,  0,  0, 10, 0, 10,  0, 10,  0, 10, 0,  0,  0,10, 0, 10,  0,  0,  0,10, 0, 10,  0,  0,  0,10],
-              [10, 0,  0,  0,10, 0, 10, 10,  0, 10,  0, 10, 0, 10, 0,  0,  0,10, 0, 10, 10, 10,10,10, 0,  5,  0,  0, 10, 0, 10,  0, 10,  0, 10, 0,  0,  0,10, 0, 10, 10, 10,10,10, 0, 10,  0,  0,  0,10],
-              [10, 0,  0,  0,10, 0, 10, 10,  0, 10,  0, 10, 0, 10, 0,  0,  0,10, 0, 10,  0,  0,  0,10, 0,  5,  0,  0, 10, 0, 10,  0, 10,  0, 10, 0,  0,  0,10, 0, 10,  0,  0,  0,10, 0, 10,  0,  0,  0,10],
-              [10, 0,  0,  0,10, 0, 10, 10,  0, 10,  0, 10, 0, 10, 0,  0,  0,10, 0, 10, 10, 10,10,10, 0,  5,  0,  0, 10, 0, 10,  0, 10,  0, 10, 0,  0,  0,10, 0, 10, 10, 10,10,10, 0, 10,  0,  0,  0,10],
-              [10, 0,  0,  0,10, 0, 10, 10,  0, 10,  0, 10, 0, 10, 0,  0,  0,10, 0, 10,  0,  0,  0,10, 0,  5,  0,  0, 10, 0, 10,  0, 10,  0, 10, 0,  0,  0,10, 0, 10,  0,  0,  0,10, 0, 10,  0,  0,  0,10],
-              [10,10,10,10,10, 0, 10,  5, 10,  5, 10,  5, 0, 10,10,10,10,10, 0, 10, 10,10,10,10, 0,  5, 10,10,10, 5, 0, 10,  0, 10,  0, 10,10,10,10,10, 0, 10,10,10,10,10, 0, 10,10,10,10,10],
-          ]
+          now = datetime.datetime.now()
+          msg = f"Automated commit on {now.strftime('%Y-%m-%d %H:%M:%S')}"
 
-          today = datetime.date.today()
-          year_start = datetime.date(today.year, 1, 1)
-          week_num = (today - year_start).days // 7  # 0-based week idx
-          day_num = today.weekday()  # 0=Mon ... 6=Sun
+          # log.txt me commit time likhna
+          with open("log.txt", "a") as f:
+              f.write(msg + "\n")
 
-          # Always at least one commit so run shows up in dashboard
-          commits_today = 1
-          if day_num < len(PATTERN) and week_num < len(PATTERN[0]):
-              commits_today = PATTERN[day_num][week_num] or 1
-
-          print(f"Week: {week_num}, Day: {day_num}, Commits today: {commits_today}")
-
-          # Set repo-local identity (no --global needed)
+          # Git config
           subprocess.run(["git", "config", "user.name", "chsabii"])
           subprocess.run(["git", "config", "user.email", "choudarysohaib786@gmail.com"])
 
-          for i in range(commits_today):
-              with open("log.txt", "a") as f:
-                  f.write(f"{datetime.datetime.now()} - Week {week_num}, Day {day_num}, Commit {i+1}\n")
-              subprocess.run(["git", "add", "log.txt"])
-              subprocess.run(["git", "commit", "-m", f"Pattern commit {i+1} - Week {week_num}, Day {day_num}"])
+          # Changes add & commit
+          subprocess.run(["git", "add", "log.txt"])
+          result = subprocess.run(["git", "commit", "-m", msg])
 
+          # Agar koi change na mila to commit skip ho jaye
+          if result.returncode != 0:
+              print("No changes to commit")
+
+          # Push to repo
           subprocess.run(["git", "push"])
-          PY
-
-      - name: Run Python script
-        run: python pattern_commit.py
+        shell: python
