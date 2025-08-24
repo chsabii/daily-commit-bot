@@ -30,6 +30,7 @@ jobs:
 import datetime
 import subprocess
 
+# Commit pattern matrix (7 rows = days, columns = weeks)
 PATTERN = [
     [10,10,10,10,10, 0, 10,  5, 10,  5, 10,  5,  0, 10,10,10,10,10, 0, 10, 10,10,10,10, 0,  5, 10,10,10, 5,  0, 10,  0, 10,  0, 10,10,10,10,10, 0, 10,10,10,10,10, 0, 10,10,10,10,10],
     [10, 0,  0,  0,10, 0, 10, 10,  0, 10,  0, 10, 0, 10, 0,  0,  0,10, 0, 10,  0,  0,  0,10, 0,  5,  0,  0, 10, 0, 10,  0, 10,  0, 10, 0,  0,  0,10, 0, 10,  0,  0,  0,10, 0, 10,  0,  0,  0,10],
@@ -43,26 +44,32 @@ PATTERN = [
 today = datetime.date.today()
 year_start = datetime.date(today.year, 1, 1)
 week_num = (today - year_start).days // 7
-day_num = today.weekday()
-day_num = (day_num + 1) % 7
+day_num = today.weekday()  # 0 = Monday, 6 = Sunday
 
-commits_today = 0
-if week_num < len(PATTERN[0]) and day_num < len(PATTERN):
+# Default commits = 1 (so workflow always pushes something)
+commits_today = 1  
+
+# Use pattern if inside range
+if day_num < len(PATTERN) and week_num < len(PATTERN[0]):
     commits_today = PATTERN[day_num][week_num]
+    if commits_today == 0:
+        commits_today = 1  # override to keep workflow alive
 
 print(f"Week: {week_num}, Day: {day_num}, Commits today: {commits_today}")
 
+# Git identity
 subprocess.run(["git", "config", "--global", "user.name", "chsabii"])
 subprocess.run(["git", "config", "--global", "user.email", "choudarysohaib786@gmail.com"])
 
+# Perform commits
 for i in range(commits_today):
     with open("log.txt", "a") as f:
-        f.write(f"{datetime.datetime.now()} - Auto commit {i+1}\\n")
+        f.write(f"{datetime.datetime.now()} - Week {week_num}, Day {day_num}, Commit {i+1}\n")
     subprocess.run(["git", "add", "log.txt"])
-    subprocess.run(["git", "commit", "-m", f"Pattern commit {i+1} - {datetime.datetime.now()}"])
+    subprocess.run(["git", "commit", "-m", f"Pattern commit {i+1} - Week {week_num}, Day {day_num}, {datetime.datetime.now()}"])
 
-if commits_today > 0:
-    subprocess.run(["git", "push"])
+# Push always
+subprocess.run(["git", "push"])
 EOF
 
     - name: Run Python script
